@@ -1,0 +1,3 @@
+20120923 (1.0.2) - Removed deprecated Java calls to make code work with CF10
+20111705 (1.0.1) - Removed CF8 specific tags so code will run in CFMX7 (the base version) -  specifically addCertForm.cfm use of <CFWINDOW>.
+20080319 (1.0.0) - Initial release

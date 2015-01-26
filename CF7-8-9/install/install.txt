@@ -1,0 +1,18 @@
+To Install:-
+
+Extract the contents of the 'certman/CF<X>' directory (where X is your Coldfusion version) into a CFIDE/administrator/certman/ directory
+
+* In Coldfusion 8/9 - Edit the CFIDE\administrator\custommenu.xml file to add the following submenu xml key:-
+		
+	<submenu label="SSL Certificates">
+		<menuitem href="certman" target="content">Certificate Management</menuitem>
+	</submenu>
+
+	You can only use this extension in a multiuser-admin environment when logged in as the administrator user.
+
+
+* In Coldfusion 7 - Create/Edit CFIDE\administrator\extensionscustom.cfm to add:-
+		
+	<a href="certman" target="content">Certificate Management</a><br>
+	
+Paul Connell <certman@paulconnell.info>

@@ -1,0 +1,2 @@
+20111705 (1.0.1) - Removed CF8 specific tags so code will run in CFMX7 (the base version) -  specifically addCertForm.cfm use of <CFWINDOW>.
+20080319 (1.0.0) - Initial release

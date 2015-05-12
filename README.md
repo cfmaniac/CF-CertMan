@@ -1,3 +1,4 @@
+![alt tag](https://raw.github.com/cfmaniac/CF-CertMan/assets/CertMan-2014.png)
 # CF-CertMan
 A Coldfusion Administrator Extension that allows adding/viewing/removing of SSL certificates in the Java certificate store from within the Administrator.
 

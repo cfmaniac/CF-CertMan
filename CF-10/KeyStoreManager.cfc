@@ -1,141 +1,119 @@
-<!--- Copyright (c) 2008 Paul Connell <certman@paulconnell.info> --->
+// Copyright (c) 2008 Paul Connell <certman@paulconnell.info>
 
-<cfcomponent displayname="KeyStoreManager" hint="Methods and data for accessing the Java Keystore" output="false">
+component displayName="KeyStoreManager" output="false" {
 
-	<cfset Variables.KeyStorePath = "">
-	<!--- if this is not your cacerts password, alter it (this is the default) --->
-	<cfset Variables.KeyStorePassword = "changeit">
-	<cfset Variables.ks = "">
+	Variables.KeyStorePath = '';
+	//  if this is not your cacerts password, alter it (this is the default)
+	Variables.KeyStorePassword = 'changeit';
+	Variables.ks = '';
 
-	<cffunction name="init" output="false" access="public">
-		<cfscript>
-		var SystemSettings = CreateObject("java","java.lang.System");
+	public function init() {
+		var SystemSettings = CreateObject('java','java.lang.System');
 		var FileSeparator = SystemSettings.getProperty("file.separator");
 		Variables.KeyStorePath = "#SystemSettings.getProperty('java.home')##FileSeparator#lib#FileSeparator#security#FileSeparator#cacerts";
 		// load the keystore into the object
 		Load();
-		return This;
-		</cfscript>
-	</cffunction>
+		return This;		
+	} 
 
-	<cffunction name="listAll" output="false" access="public">
-		<cfset var CertificateArray = ArrayNew(2)>
-		<cfset var AliasEnum = Variables.ks.aliases()>
-		<cfset var ThisCertificate = "">
-		<cfset var AliasString = "">
-		<cfset var ArrayLength = 0>
-		<cfloop condition="#AliasEnum.hasMoreElements()#">
-			<cfscript>
+
+	public function listAll() {
+		var CertificateArray = ArrayNew(2);
+		var AliasEnum = Variables.ks.aliases();
+		var ThisCertificate = '';
+		var AliasString = '';
+		var ArrayLength = 0;	
+
+		while( AliasEnum.hasMoreElements() )	{
 			ArrayLength = ArrayLen(CertificateArray)+1;
 			AliasString = AliasEnum.nextElement().toString();
 			ThisCertificate = CreateObject("component","Certificate").init(Variables.ks.getCertificate(AliasString));
 			CertificateArray[ArrayLength][1] = AliasString;
-			CertificateArray[ArrayLength][2] = ThisCertificate;
-			</cfscript>
-		</cfloop>
-		<cfset sortedCertArray=ArraySort2D(CertificateArray, 1, "textnocase")>
-		<cfreturn sortedCertArray>
-	</cffunction>
+			CertificateArray[ArrayLength][2] = ThisCertificate;			
+		} // End While
 
-	<cffunction name="containsAlias" output="false" access="public">
-		<cfargument name="Alias" required="true">
-		<cfreturn Variables.ks.containsAlias(Arguments.Alias)>
-	</cffunction>
+		return ArraySort2D(CertificateArray, 1, "textnocase");
+	}
 
-	<cffunction name="add" output="false" access="public">
-		<cfargument name="Alias" required="true">
-		<cfargument name="CertificateFilePath" required="true">
-		<cfset var InputStream = "">
-		<cfset var BufferedInputStream = "">
-		<cfset var CertificateFactory = "">
-		<cfset var Certificate = "">
-		<cftry>
-		<cfscript>
-		InputStream = CreateObject("java","java.io.FileInputStream").init(Arguments.CertificateFilePath);
-		BufferedInputStream = CreateObject("java","java.io.BufferedInputStream").init(InputStream);
-		CertificateFactory = CreateObject("java", "java.security.cert.CertificateFactory").getInstance("X.509");
-		Certificate = CertificateFactory.generateCertificate(BufferedInputStream);
-		InputStream.close();
-		
-		if (NOT Len(Trim(Variables.ks.getCertificateAlias(Certificate))))
-		{
-			Variables.ks.setCertificateEntry(Arguments.Alias, Certificate);		
-			Store();
-			return "";
-		}
-		else
-		{
-			return Variables.ks.getCertificateAlias(Certificate);
-		}
-		</cfscript>
-		<cfcatch type="any">
-			<cfset InputStream.close()>
-			<cfrethrow>
-		</cfcatch>
-		</cftry>
-	</cffunction>
+	public function containsAlias(required Alias) {
+		return Variables.ks.containsAlias(Arguments.Alias);
+	}
 
-	<cffunction name="delete" output="false" access="public">
-		<cfargument name="CertificateAlias" required="true">
-		<cfscript>
-		if (Variables.ks.containsAlias(Arguments.CertificateAlias))
-		{
+	public function add(required Alias, required CertificateFilePath) {
+		var CertificateArray = ArrayNew(2);
+		var AliasEnum = Variables.ks.aliases();
+		var ThisCertificate = '';
+		var AliasString = '';
+		var ArrayLength = 0;
+
+		try {
+			InputStream = CreateObject("java","java.io.FileInputStream").init(Arguments.CertificateFilePath);
+			BufferedInputStream = CreateObject("java","java.io.BufferedInputStream").init(InputStream);
+			CertificateFactory = CreateObject("java", "java.security.cert.CertificateFactory").getInstance("X.509");
+			Certificate = CertificateFactory.generateCertificate(BufferedInputStream);
+			InputStream.close();
+			
+			if (NOT Len(Trim(Variables.ks.getCertificateAlias(Certificate)))){
+				Variables.ks.setCertificateEntry(Arguments.Alias, Certificate);		
+				Store();
+				return "";
+			} else {
+				return Variables.ks.getCertificateAlias(Certificate);
+			}
+		} catch( any e ) {
+			InputStream.close();
+			rethrow;
+		}	
+	}
+
+	public function delete(required CertificateAlias) {
+		if (Variables.ks.containsAlias(Arguments.CertificateAlias)) {
 			Variables.ks.deleteEntry(Arguments.CertificateAlias);
 			Store();
 		}
-		</cfscript>
-	</cffunction>
+	}
 
-	<cffunction name="read" output="false" access="public">
-		<cfargument name="CertificateAlias" required="true">
-		<cfscript>
+	public function read(required CertificateAlias) {
 		var ThisCertificate = "";
-		if (Variables.ks.containsAlias(Arguments.CertificateAlias))
-		{
+		if (Variables.ks.containsAlias(Arguments.CertificateAlias))	{
 			ThisCertificate = CreateObject("component","Certificate").init(Variables.ks.getCertificate(Arguments.CertificateAlias));
 		}
 		return ThisCertificate;
-		</cfscript>
-	</cffunction>
+	}
 
-	<cffunction name="load" output="false" access="private">
-		<cfset var KeyStore = "">
-		<cfset var InputStream = "">
-		<cftry>
-		<cflock name="KeyStoreFileLock" timeout="5" type="readonly">
-			<cfscript>
-			KeyStore = CreateObject("java","java.security.KeyStore");
-			Variables.ks = KeyStore.getInstance(KeyStore.getDefaultType());
-			InputStream = CreateObject("java","java.io.FileInputStream").init(Variables.KeyStorePath);
-			Variables.ks.load(InputStream, Variables.KeyStorePassword.toCharArray());
+	private function load() {
+		var KeyStore = '';
+		var InputStream = '';
+
+		try {
+			lock name="KeyStoreFileLock" timeout="5" type="readonly" {
+				KeyStore = CreateObject("java","java.security.KeyStore");
+				Variables.ks = KeyStore.getInstance(KeyStore.getDefaultType());
+				InputStream = CreateObject("java","java.io.FileInputStream").init(Variables.KeyStorePath);
+				Variables.ks.load(InputStream, Variables.KeyStorePassword.toCharArray());
+				InputStream.close();			
+			}
+		} catch( any e ) {
 			InputStream.close();
-			</cfscript>
-		</cflock>
-		<cfcatch type="any">
-			<cfset InputStream.close()>
-			<cfrethrow>
-		</cfcatch>
-		</cftry>
-	</cffunction>
-	
-	<cffunction name="store" output="false" access="private">
-		<cfset var OutputStream = "">
-		<cftry>
-		<cflock name="KeyStoreFileLock" timeout="5" type="exclusive">
-			<cfscript>
-			OutputStream = CreateObject("java","java.io.FileOutputStream").init(Variables.KeyStorePath);
-        	Variables.ks.store(OutputStream, Variables.KeyStorePassword.toCharArray());
-	        OutputStream.close();
-		</cfscript>
-		</cflock>
-		<cfcatch type="any">
-			<cfset OutputStream.close()>
-			<cfrethrow>
-		</cfcatch>
-		</cftry>
-	</cffunction>
-	
-	<cfscript>
+			rethrow;
+		}
+	}
+
+	private function store() {
+		var OutputStream = '';
+
+		try {
+			lock name="KeyStoreFileLock" timeout="5" type="exclusive" {
+				OutputStream = CreateObject("java","java.io.FileOutputStream").init(Variables.KeyStorePath);
+				Variables.ks.store(OutputStream, Variables.KeyStorePassword.toCharArray());
+				OutputStream.close();		
+			}
+		} catch( any e ) {
+			OutputStream.close();
+			rethrow;
+		}
+	}
+
 /**
  * Sorts a two dimensional array by the specified column in the second dimension.
  * 
@@ -170,8 +148,6 @@ function ArraySort2D(arrayToSort, sortColumn, type) {
         ArrayDeleteAt(arrayToSort, thePosition);
         counter = counter + 1;
     }
-    return arrayToReturn;
+    	return arrayToReturn;
+	}	
 }
-</cfscript>
-	
-</cfcomponent>

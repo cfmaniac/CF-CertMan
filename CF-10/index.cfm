@@ -24,16 +24,16 @@
 		<tr>
 			<th scope="col" nowrap bgcolor="#F3F7F7" class="cellBlueTopAndBottom">
 				<strong> Actions </strong></th>
-			<th scope="col" nowrap bgcolor="#F3F7F7" class="cellBlueTopAndBottom">				
+			<th scope="col" nowrap bgcolor="#F3F7F7" class="cellBlueTopAndBottom">
 				<strong> Alias </strong>
 			</th>
-			<th scope="col" nowrap bgcolor="#F3F7F7" class="cellBlueTopAndBottom">				
+			<th scope="col" nowrap bgcolor="#F3F7F7" class="cellBlueTopAndBottom">
 				<strong> Not Before </strong>
 			</th>
-			<th scope="col" nowrap bgcolor="#F3F7F7" class="cellBlueTopAndBottom">				
+			<th scope="col" nowrap bgcolor="#F3F7F7" class="cellBlueTopAndBottom">
 				<strong> Not After </strong>
 			</th>
-			<th scope="col" nowrap bgcolor="#F3F7F7" class="cellBlueTopAndBottom">				
+			<th scope="col" nowrap bgcolor="#F3F7F7" class="cellBlueTopAndBottom">
 				<strong> Common Name </strong>
 			</th>
 		</tr>
@@ -44,11 +44,11 @@
 					<tr>
 						<td align="center">
 							<cfoutput>
-							<a href="downloadCert.cfm?alias=#CertificateArray[i][1]#"
+							<a href="downloadCert.cfm?alias=#encodeForUrl(CertificateArray[i][1])#"
 							   onmouseover="window.status='Download PEM'; return true;"
 							   onmouseout="window.status=''; return true;"
 							   title="Download PEM"><img src="/CFIDE/administrator/images/download.gif" vspace="2" hspace="2" width="16" height="16" alt="Download PEM" title="Download PEM" border="0"></a>
-							<a href="deleteCert.cfm?alias=#CertificateArray[i][1]#"
+							<a href="deleteCert.cfm?alias=#encodeForUrl(CertificateArray[i][1])#"
 							   onmouseover="window.status='Delete Certificate'; return true;"
 							   onmouseout="window.status=''; return true;"
 							   onclick="return confirm('Are you sure you want to delete this certificate?');"
@@ -57,10 +57,10 @@
 						</td>
 					</tr>
 					</table>
-					
+
 				</td>
 				<td nowrap class="cellRightAndBottomBlueSide">
-					<cfoutput><a href="displayCert.cfm?alias=#CertificateArray[i][1]#"
+					<cfoutput><a href="displayCert.cfm?alias=#encodeForUrl(CertificateArray[i][1])#"
 					   onmouseover2="window.status='View Certificate Details'; return true;"
 					   onmouseout2="window.status='';" title="View Certificate Details">
 					   #CertificateArray[i][1]#</a></cfoutput>
@@ -74,17 +74,17 @@
 				<td nowrap class="cellRightAndBottomBlueSide">
 					<cfoutput>#left(CertificateArray[i][2].getCommonName(),80)#</cfoutput>
 				</td>
-		
+
 			</tr>
 			</cfloop>
 			</table>
 		</tr>
 	</table>
-	
+
 	<cfif isDefined("url.restartreq")>
 	<script>
 		window.alert('For these changes to take effect, you may have to restart the ColdFusion Service.');
 	</script>
 	</cfif>
-	
+
 <cfinclude template="footer.cfm">
